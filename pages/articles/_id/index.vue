@@ -18,7 +18,8 @@
             <div class="date">
               <span>{{dateFormat(article.updateDate)}}</span>
               <span class="Mlf10">阅读</span>
-              <span>{{count}}</span>
+              <span>{{0}}</span>
+              <label>{{user.name}}</label>
             </div>
           </div>
           <button class="attention">关注</button>
@@ -44,18 +45,20 @@
 <script>
 import { api } from "~/assets/js/common/axios.js";
 import utils from "~/assets/js/utils.js";
-import { mapMutations } from 'vuex'
+import { mapMutations } from "vuex";
+import { MessageBox } from "mint-ui";
+import { Toast } from "mint-ui";
 
 export default {
   components: {},
   data: function() {
     return {
-      user: {},
       article: {},
       isShowMenu: false
     };
   },
   asyncData: function(context) {
+    // context.store.dispatch("getUser");
     return api
       .get("/articles/" + context.params.id)
       .then(res => {
@@ -63,13 +66,16 @@ export default {
         return { article: res.data.data };
       })
       .catch(err => {
-        console.log(err);
+
       });
   },
-  computed:{
-      count:function(){
-          return this.$store.state.counter;
-      }
+  mounted: function() {
+    !this._.isEmpty(this.user) || this.$store.dispatch("getUser");
+  },
+  computed: {
+    user: function() {
+      return this.$store.state.userInfo || {};
+    }
   },
   methods: {
     dateFormat: function(date) {
@@ -77,38 +83,37 @@ export default {
     },
     delArticle() {
       var that = this;
-      if (that.user.id != user_id && that.user.id != 1) {
-        that.$message.error("只能删除自己的文章！");
+      if (that.user.id != that.article.user.id) {
+        Toast("只能删除自己的文章！");
+        that.isShowMenu = false;
         return false;
       }
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      })
+      MessageBox.confirm("此操作将永久删除该文件, 是否继续?")
         .then(function() {
           api
-            .get("/articles/delete/" + articles_id + "?token=1")
+            .get("/articles/delete/" + that.article.id)
             .then(function(res) {
-              if (res.data.message == "success") {
-                that.$message.success("删除成功！");
-                that.getArticles();
+              if (res.data.success) {
+                that.$router.push("/articles");
               } else {
-                that.$message.success("删除失败！");
+                Toast("删除失败！");
               }
             })
             .catch(function(err) {
-              that.$message.success(err);
+              console.error(err);
+              Toast("服务器错误");
             });
         })
-        .catch(function() {});
+        .catch(function(err) {
+            console.error(err);
+        });
     },
-    ...mapMutations(["increment"])
-  },
-//   async fetch({ store, params }) {
-//     let { data } = await api.get("/user/userInfo");
-//     store.commit("setUser", data);
-//   }
+    ...mapMutations(["setUser"])
+  }
+  //   async fetch({ store, params }) {
+  //     let { data } = await api.get("/user/user");
+  //     store.commit("setUser", data);
+  //   }
 };
 </script>
 

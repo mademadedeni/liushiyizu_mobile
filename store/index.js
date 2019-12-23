@@ -1,25 +1,24 @@
+import { api } from "~/assets/js/common/axios.js";
+
 export const state = () => ({
-    counter: 0,
-    user:{}
+    userInfo: {}
 })
 
 export const mutations = {
-    increment(state) {
-        state.counter++
+    setUser(state, userInfo) {
+        state.userInfo = userInfo;
     }
 }
 
 export const actions = {
-    nuxtServerInit(store) {
-        if (store.state.user) {
-            api.get("/user/userInfo").then(res =>{
-                if(res.data.success){
-                    store.commit("setUser",res.data.data);
-                }
-            })
-        }
+    nuxtServerInit({ commit }, { req }){
+        // console.log(commit,req);
     },
-    getUser() {
+    async getUser({ commit }) {
+        await api.get("/user/userInfo").then(res => {
+            commit('setUser', res.data.data)
+        }).catch(err => {
 
-    }
+        })
+    },
 }

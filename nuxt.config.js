@@ -1,17 +1,18 @@
 const isDev = process.env.NODE_ENV == "development";
+const IP = "10.17.2.1";
 module.exports = {
-    mode: 'spa',
+    mode: 'universal',
     router: {
         middleware: 'checkEnv',
         base: '/mobile/'
     },
     env: {
-        baseUrl: isDev ? 'http://172.17.20.185:4000' : 'http://www.liushiyizu.top',
-        apiUrl: isDev ? 'http://172.17.20.185:4000' : 'http://www.liushiyizu.top',
+        baseUrl: isDev ? `http://${IP}:5000` : 'http://www.liushiyizu.top',
+        apiUrl: isDev ? `http://${IP}:4000` : 'http://www.liushiyizu.top',
     },
     server: isDev ? {
         port: 5000,
-        host: '172.17.20.185',
+        host: `${IP}`,
     } : {
             port: 6868,
             host: 'localhost',

@@ -25,6 +25,7 @@ request.interceptors.request.use(function (_config) {
 request.interceptors.response.use(function (response) {
     //未登录
     if (response.data.code == 1) {
+        // console.log(response.config,response.data);
         window.location.href = "/mobile/login";
     }
     return response;
